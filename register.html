@@ -63,6 +63,70 @@
   input:focus, select:focus { outline: none; border-color: var(--orange); background: var(--white); }
   input::placeholder { color: var(--ink-faint); }
 
+  /* Split mobile input */
+  .mobile-wrap {
+    display: flex;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: var(--peach);
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .mobile-wrap:focus-within {
+    border-color: var(--orange);
+    background: var(--white);
+  }
+  /* Locked prefix (display-only) */
+  .mobile-prefix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    background: var(--cream);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+    border-right: 1.5px solid var(--line);
+    min-width: 90px;
+    letter-spacing: 0.02em;
+  }
+  .mobile-prefix.empty {
+    color: var(--ink-faint);
+    font-weight: 400;
+    font-size: 13px;
+  }
+  /* Editable prefix input (when Other selected) */
+  .mobile-prefix-input {
+    border: none !important;
+    background: var(--cream) !important;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+    border-right: 1.5px solid var(--line) !important;
+    border-radius: 0 !important;
+    padding: 0 12px !important;
+    width: 90px;
+    min-width: 90px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .mobile-prefix-input:focus { background: var(--cream) !important; }
+  .mobile-wrap input.mobile-num {
+    border: none;
+    background: transparent;
+    border-radius: 0;
+    flex: 1;
+  }
+  .mobile-wrap input.mobile-num:focus { background: transparent; }
+
+  .helper-tip {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .helper-tip .tamil { font-family: var(--tamil); margin-left: 4px; }
+
   .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   .divider { height: 1px; background: var(--line); margin: 32px 0; }
 
@@ -105,6 +169,8 @@
     .form-card { padding: 32px 24px; margin-bottom: 40px; }
     .field-row { grid-template-columns: 1fr; gap: 0; }
     .field-row .field { margin-bottom: 18px; }
+    .mobile-prefix { min-width: 80px; padding: 0 12px; font-size: 14px; }
+    .mobile-prefix-input { width: 80px; min-width: 80px; padding: 0 8px !important; font-size: 14px; }
     .fan-id-card .name { font-size: 22px; }
     .fan-id-card .id-value { font-size: 19px; }
     .success-screen h2 { font-size: 44px; }
@@ -156,8 +222,41 @@
           <input type="date" name="date_of_birth" required>
         </div>
         <div class="field">
-          <label>Mobile <span class="tamil">/ கைபேசி எண்</span> <span class="req">*</span></label>
-          <input type="tel" name="mobile" required maxlength="15" placeholder="+91 9876543210" autocomplete="tel">
+          <label>Country <span class="tamil">/ நாடு</span> <span class="req">*</span></label>
+          <select name="country" id="countrySelect" required>
+            <option value="">Select country / நாட்டைத் தேர்வு செய்க</option>
+            <option value="IN" data-code="+91">India / இந்தியா</option>
+            <option value="MY" data-code="+60">Malaysia / மலேசியா</option>
+            <option value="SG" data-code="+65">Singapore / சிங்கப்பூர்</option>
+            <option value="LK" data-code="+94">Sri Lanka / இலங்கை</option>
+            <option value="AE" data-code="+971">United Arab Emirates / ஐக்கிய அரபு அமீரகம்</option>
+            <option value="GB" data-code="+44">United Kingdom / ஐக்கிய இராச்சியம்</option>
+            <option value="US" data-code="+1">United States / அமெரிக்கா</option>
+            <option value="CA" data-code="+1">Canada / கனடா</option>
+            <option value="AU" data-code="+61">Australia / ஆஸ்திரேலியா</option>
+            <option value="QA" data-code="+974">Qatar / கட்டார்</option>
+            <option value="KW" data-code="+965">Kuwait / குவைத்</option>
+            <option value="OM" data-code="+968">Oman / ஓமான்</option>
+            <option value="SA" data-code="+966">Saudi Arabia / சவுதி அரேபியா</option>
+            <option value="MU" data-code="+230">Mauritius / மொரிசியஸ்</option>
+            <option value="DE" data-code="+49">Germany / ஜெர்மனி</option>
+            <option value="FR" data-code="+33">France / பிரான்ஸ்</option>
+            <option value="NZ" data-code="+64">New Zealand / நியூசிலாந்து</option>
+            <option value="ZA" data-code="+27">South Africa / தென் ஆப்பிரிக்கா</option>
+            <option value="XX" data-code="">Other / மற்றவை</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Mobile <span class="tamil">/ கைபேசி எண்</span> <span class="req">*</span></label>
+        <div class="mobile-wrap" id="mobileWrap">
+          <!-- Default: locked prefix display -->
+          <div class="mobile-prefix empty" id="mobilePrefix">Pick country</div>
+          <input type="tel" name="mobile" id="mobileInput" class="mobile-num" required maxlength="14" placeholder="9876543210" autocomplete="tel-national" inputmode="numeric">
+        </div>
+        <div class="helper-tip" id="otherTip" style="display:none;">
+          Type your country code (e.g. +47 for Norway). <span class="tamil">உங்கள் நாட்டுக் குறியீட்டை உள்ளிடவும்.</span>
         </div>
       </div>
 
@@ -197,32 +296,6 @@
           <label>State <span class="tamil">/ மாநிலம்</span> <span class="req">*</span></label>
           <input type="text" name="state" required maxlength="100" placeholder="Tamil Nadu">
         </div>
-      </div>
-
-      <div class="field">
-        <label>Country <span class="tamil">/ நாடு</span> <span class="req">*</span></label>
-        <select name="country" required>
-          <option value="">Select your country / உங்கள் நாட்டைத் தேர்வு செய்க</option>
-          <option value="IN">India / இந்தியா</option>
-          <option value="MY">Malaysia / மலேசியா</option>
-          <option value="SG">Singapore / சிங்கப்பூர்</option>
-          <option value="LK">Sri Lanka / இலங்கை</option>
-          <option value="AE">United Arab Emirates / ஐக்கிய அரபு அமீரகம்</option>
-          <option value="GB">United Kingdom / ஐக்கிய இராச்சியம்</option>
-          <option value="US">United States / அமெரிக்கா</option>
-          <option value="CA">Canada / கனடா</option>
-          <option value="AU">Australia / ஆஸ்திரேலியா</option>
-          <option value="QA">Qatar / கட்டார்</option>
-          <option value="KW">Kuwait / குவைத்</option>
-          <option value="OM">Oman / ஓமான்</option>
-          <option value="SA">Saudi Arabia / சவுதி அரேபியா</option>
-          <option value="MU">Mauritius / மொரிசியஸ்</option>
-          <option value="DE">Germany / ஜெர்மனி</option>
-          <option value="FR">France / பிரான்ஸ்</option>
-          <option value="NZ">New Zealand / நியூசிலாந்து</option>
-          <option value="ZA">South Africa / தென் ஆப்பிரிக்கா</option>
-          <option value="XX">Other / மற்றவை</option>
-        </select>
       </div>
 
       <div class="divider"></div>
@@ -273,20 +346,78 @@
   const formView = document.getElementById('formView');
   const successView = document.getElementById('successView');
 
+  const countrySelect = document.getElementById('countrySelect');
+  const mobileWrap    = document.getElementById('mobileWrap');
+  const otherTip      = document.getElementById('otherTip');
+
+  // We will swap between two prefix elements depending on country choice:
+  //   - <div class="mobile-prefix"> for known countries (locked display)
+  //   - <input class="mobile-prefix-input"> for "Other" (editable)
+  function setLockedPrefix(code) {
+    mobileWrap.innerHTML = `
+      <div class="mobile-prefix ${code ? '' : 'empty'}" id="mobilePrefix">${code || 'Pick country'}</div>
+      <input type="tel" name="mobile" id="mobileInput" class="mobile-num" required maxlength="14" placeholder="9876543210" autocomplete="tel-national" inputmode="numeric">
+    `;
+    attachMobileInputHandler();
+    otherTip.style.display = 'none';
+  }
+
+  function setEditablePrefix() {
+    mobileWrap.innerHTML = `
+      <input type="tel" name="mobile_prefix" id="mobilePrefixInput" class="mobile-prefix-input" placeholder="+47" maxlength="5" inputmode="tel">
+      <input type="tel" name="mobile" id="mobileInput" class="mobile-num" required maxlength="14" placeholder="9876543210" autocomplete="tel-national" inputmode="numeric">
+    `;
+    attachMobileInputHandler();
+    // Force prefix input to keep leading + and digits only
+    const prefixInput = document.getElementById('mobilePrefixInput');
+    prefixInput.addEventListener('input', (e) => {
+      let v = e.target.value.replace(/[^\d+]/g, '');
+      if (!v.startsWith('+')) v = '+' + v.replace(/\+/g, '');
+      // Only one + at most, rest digits
+      v = '+' + v.slice(1).replace(/\+/g, '');
+      e.target.value = v;
+    });
+    otherTip.style.display = 'block';
+  }
+
+  function attachMobileInputHandler() {
+    const mobileInput = document.getElementById('mobileInput');
+    mobileInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+  }
+
+  attachMobileInputHandler();
+
+  countrySelect.addEventListener('change', () => {
+    const opt  = countrySelect.selectedOptions[0];
+    const code = opt ? opt.getAttribute('data-code') : '';
+    const val  = countrySelect.value;
+
+    if (val === 'XX') {
+      setEditablePrefix();
+    } else if (code) {
+      setLockedPrefix(code);
+    } else {
+      setLockedPrefix(''); // empty / no country
+    }
+  });
+
   const ERR = {
     name:     ['Please enter your name.', 'உங்கள் பெயரை உள்ளிடவும்.'],
     surname:  ['Please enter your surname.', 'உங்கள் குடும்பப் பெயரை உள்ளிடவும்.'],
     dob:      ['Please enter your date of birth.', 'உங்கள் பிறந்த தேதியை உள்ளிடவும்.'],
+    country:  ['Please select your country.', 'உங்கள் நாட்டைத் தேர்வு செய்யவும்.'],
+    prefix:   ['Please enter your country code (e.g. +47).', 'உங்கள் நாட்டுக் குறியீட்டை உள்ளிடவும்.'],
     mobile:   ['Please enter your mobile number.', 'உங்கள் கைபேசி எண்ணை உள்ளிடவும்.'],
-    mobileFmt:['Mobile number looks invalid. Use country code (e.g. +91 9876543210).', 'கைபேசி எண் சரியாக இல்லை. நாட்டுக் குறியீட்டுடன் உள்ளிடவும்.'],
+    mobileFmt:['Mobile number looks invalid. Should be 7-14 digits.', 'கைபேசி எண் சரியாக இல்லை. 7-14 இலக்கங்கள் இருக்க வேண்டும்.'],
     street:   ['Please enter your street address.', 'உங்கள் தெருவை உள்ளிடவும்.'],
     city:     ['Please enter your city.', 'உங்கள் நகரத்தை உள்ளிடவும்.'],
     pincode:  ['Please enter your pincode.', 'உங்கள் அஞ்சல் குறியீட்டை உள்ளிடவும்.'],
     state:    ['Please enter your state.', 'உங்கள் மாநிலத்தை உள்ளிடவும்.'],
-    country:  ['Please select your country.', 'உங்கள் நாட்டைத் தேர்வு செய்யவும்.'],
     age13:    ['You must be at least 13 years old to register.', 'பதிவு செய்ய குறைந்தபட்சம் 13 வயது இருக்க வேண்டும்.'],
     ageBad:   ['Please enter a valid date of birth.', 'சரியான பிறந்த தேதியை உள்ளிடவும்.'],
-    network:  ["Couldn't connect. Please check your internet and try again. The server may be waking up — try again in 30 seconds.", "இணைப்பு கிடைக்கவில்லை. சில நொடிகள் கழித்து மீண்டும் முயற்சிக்கவும்."]
+    network:  ["Couldn't connect. The server may be waking up — try again in 30 seconds.", "இணைப்பு கிடைக்கவில்லை. சில நொடிகள் கழித்து மீண்டும் முயற்சிக்கவும்."]
   };
 
   function showError(key) {
@@ -303,10 +434,6 @@
     errBox.classList.remove('show');
     errBox.innerHTML = '';
   }
-  function validMobile(m) {
-    const cleaned = m.replace(/[\s\-()]/g, '');
-    return /^\+?\d{8,15}$/.test(cleaned);
-  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -315,30 +442,48 @@
     const fd = new FormData(form);
     if (fd.get('website')) { console.log('Bot detected'); return; }
 
+    // Determine country code
+    const countryVal = countrySelect.value;
+    let countryCode = '';
+    if (countryVal === 'XX') {
+      // Editable prefix — read it
+      const prefixInput = document.getElementById('mobilePrefixInput');
+      countryCode = (prefixInput ? prefixInput.value : '').trim();
+      if (countryCode && !countryCode.startsWith('+')) countryCode = '+' + countryCode;
+    } else if (countryVal) {
+      const opt = countrySelect.selectedOptions[0];
+      countryCode = opt ? opt.getAttribute('data-code') : '';
+    }
+
+    const localNumber = (fd.get('mobile') || '').replace(/\D/g, '');
+    const fullMobile  = (countryCode && localNumber) ? countryCode + localNumber : '';
+
     const data = {
       name:          (fd.get('name')          || '').trim(),
       surname:       (fd.get('surname')       || '').trim(),
       date_of_birth: fd.get('date_of_birth')  || null,
-      mobile:        (fd.get('mobile')        || '').replace(/[\s\-()]/g, ''),
+      mobile:        fullMobile,
       email:         (fd.get('email')         || '').trim() || null,
       street:        (fd.get('street')        || '').trim(),
       area:          (fd.get('area')          || '').trim() || null,
       city:          (fd.get('city')          || '').trim(),
       pincode:       (fd.get('pincode')       || '').trim(),
       state:         (fd.get('state')         || '').trim(),
-      country:       fd.get('country')        || '',
+      country:       countryVal,
     };
 
+    // Validation
     if (!data.name)    return showError('name');
     if (!data.surname) return showError('surname');
     if (!data.date_of_birth) return showError('dob');
-    if (!data.mobile)  return showError('mobile');
-    if (!validMobile(data.mobile)) return showError('mobileFmt');
+    if (!data.country) return showError('country');
+    if (data.country === 'XX' && (!countryCode || countryCode.length < 2)) return showError('prefix');
+    if (!localNumber)  return showError('mobile');
+    if (localNumber.length < 7 || localNumber.length > 14) return showError('mobileFmt');
     if (!data.street)  return showError('street');
     if (!data.city)    return showError('city');
     if (!data.pincode) return showError('pincode');
     if (!data.state)   return showError('state');
-    if (!data.country) return showError('country');
 
     const dob = new Date(data.date_of_birth);
     const age = (Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
