@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Become a Fan · Legend Fans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #F26B2C;
+    --orange-deep: #D9501C;
+    --orange-soft: #FFB088;
+    --peach: #FFF4EC;
+    --cream: #FFE8DC;
+    --green: #1B5E20;
+    --gold: #C9A961;
+    --ink: #1A0F08;
+    --ink-soft: #5C4838;
+    --ink-faint: #9C8674;
+    --line: #F0E0CD;
+    --white: #FFFFFF;
+    --error: #C0392B;
+    --display: 'Fraunces', Georgia, serif;
+    --body: 'Manrope', system-ui, sans-serif;
+    --tamil: 'Noto Sans Tamil', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--body);
+    color: var(--ink);
+    background: var(--peach);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 24px;
+    color: var(--orange);
+    text-decoration: none;
+    font-style: italic;
+  }
+  .logo::after { content: '.'; color: var(--gold); }
+  .header-back {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .header-back:hover { opacity: 1; }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 60px 24px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .hero-tamil {
+    font-family: var(--tamil);
+    font-size: 22px;
+    color: var(--orange-deep);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .hero-title {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--orange);
+  }
+  .hero-subtitle {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* FORM CARD */
+  .form-card {
+    max-width: 720px;
+    margin: 0 auto 80px;
+    background: var(--white);
+    border-radius: 24px;
+    padding: 48px 48px 40px;
+    box-shadow: 0 8px 32px rgba(217, 80, 28, 0.08);
+    border: 1px solid var(--line);
+  }
+  .section-label {
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--orange-deep);
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .field {
+    margin-bottom: 18px;
+  }
+  .field-row .field { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  label .req { color: var(--orange); }
+
+  input, select {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--body);
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--peach);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--orange);
+    background: var(--white);
+  }
+  input::placeholder { color: var(--ink-faint); }
+
+  /* honeypot - invisible bot trap */
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--line);
+    margin: 32px 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    font-family: var(--body);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    background: var(--orange);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+  }
+  .submit-btn:hover:not(:disabled) {
+    background: var(--orange-deep);
+  }
+  .submit-btn:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+  .submit-btn:disabled {
+    background: var(--ink-faint);
+    cursor: not-allowed;
+  }
+
+  .small-note {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 20px;
+  }
+
+  /* ERROR MESSAGE */
+  .error-box {
+    display: none;
+    background: #FDECEA;
+    border: 1px solid #F5C2BD;
+    color: var(--error);
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .error-box.show { display: block; }
+
+  /* SUCCESS SCREEN */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 30px;
+  }
+  .success-screen.show { display: block; }
+  .success-screen h2 {
+    font-family: var(--tamil);
+    font-size: 42px;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .success-screen .welcome-line {
+    font-family: var(--display);
+    font-size: 26px;
+    color: var(--ink);
+    margin-bottom: 32px;
+    font-weight: 500;
+  }
+  .fan-id-card {
+    background: var(--ink);
+    border-radius: 18px;
+    padding: 32px;
+    margin: 30px auto;
+    max-width: 380px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .fan-id-card::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 110px; height: 110px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+  .fan-id-card .stamp {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
+  }
+  .fan-id-card .name {
+    font-family: var(--display);
+    font-size: 26px;
+    color: var(--white);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .fan-id-card .id-label {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .fan-id-card .id-value {
+    font-family: 'Courier New', monospace;
+    font-size: 22px;
+    color: var(--orange);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 18px;
+  }
+  .fan-id-card .meta {
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+  }
+  .founder-badge {
+    display: inline-block;
+    margin-top: 14px;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .success-msg {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 auto 24px;
+  }
+
+  /* MOBILE */
+  @media (max-width: 640px) {
+    .hero { padding: 40px 20px 30px; }
+    .hero-title { font-size: 36px; }
+    .form-card { padding: 32px 24px; margin-bottom: 40px; }
+    .field-row { grid-template-columns: 1fr; gap: 0; }
+    .field-row .field { margin-bottom: 18px; }
+    .fan-id-card .name { font-size: 22px; }
+    .fan-id-card .id-value { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="index.html" class="logo">Legend</a>
+  <a href="index.html" class="header-back">← Back to home</a>
+</header>
+
+<!-- FORM VIEW -->
+<div id="formView">
+  <section class="hero">
+    <div class="hero-tamil">வரவேற்கிறோம், லெஜண்ட் ரசிகர்களே</div>
+    <h1 class="hero-title">Become a <em>Legend</em> fan.</h1>
+    <p class="hero-subtitle">Get your official digital Fan ID. Join thousands of fans across Tamil Nadu, India, and around the world.</p>
+  </section>
+
+  <div class="form-card">
+    <div id="errorBox" class="error-box"></div>
+
+    <form id="registerForm" novalidate>
+      <!-- Honeypot: invisible field that real users will not fill. Bots will. -->
+      <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <div class="section-label">— Section 01 —</div>
+      <h3 class="section-title">Your identity</h3>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Name <span class="req">*</span></label>
+          <input type="text" name="name" required maxlength="80" placeholder="Sridevi" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label>Surname <span class="req">*</span></label>
+          <input type="text" name="surname" required maxlength="80" placeholder="Father's name or initial" autocomplete="family-name">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Date of birth <span class="req">*</span></label>
+          <input type="date" name="date_of_birth" required>
+        </div>
+        <div class="field">
+          <label>Mobile <span class="req">*</span></label>
+          <input type="tel" name="mobile" required maxlength="15" placeholder="+91 9876543210" autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email <span style="color:var(--ink-faint); font-weight:400;">(optional)</span></label>
+        <input type="email" name="email" maxlength="120" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">— Section 02 —</div>
+      <h3 class="section-title">Where you live</h3>
+
+      <div class="field">
+        <label>Street <span class="req">*</span></label>
+        <input type="text" name="street" required maxlength="200" placeholder="House / flat number, street">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Area <span style="color:var(--ink-faint); font-weight:400;">(optional)</span></label>
+          <input type="text" name="area" maxlength="150" placeholder="Area / locality / landmark">
+        </div>
+        <div class="field">
+          <label>City <span class="req">*</span></label>
+          <input type="text" name="city" required maxlength="100" placeholder="Thoothukudi">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Pincode <span class="req">*</span></label>
+          <input type="text" name="pincode" required maxlength="12" placeholder="628001">
+        </div>
+        <div class="field">
+          <label>State <span class="req">*</span></label>
+          <input type="text" name="state" required maxlength="100" placeholder="Tamil Nadu">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Country <span class="req">*</span></label>
+        <select name="country" required>
+          <option value="">Select your country</option>
+          <option value="IN">India</option>
+          <option value="MY">Malaysia</option>
+          <option value="SG">Singapore</option>
+          <option value="LK">Sri Lanka</option>
+          <option value="AE">United Arab Emirates</option>
+          <option value="GB">United Kingdom</option>
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="AU">Australia</option>
+          <option value="QA">Qatar</option>
+          <option value="KW">Kuwait</option>
+          <option value="OM">Oman</option>
+          <option value="SA">Saudi Arabia</option>
+          <option value="MU">Mauritius</option>
+          <option value="DE">Germany</option>
+          <option value="FR">France</option>
+          <option value="NZ">New Zealand</option>
+          <option value="ZA">South Africa</option>
+          <option value="XX">Other</option>
+        </select>
+      </div>
+
+      <div class="divider"></div>
+
+      <button type="submit" id="submitBtn" class="submit-btn">
+        Become a Fan →
+      </button>
+      <p class="small-note">By registering, you join the All World Legend Fans Association.</p>
+    </form>
+  </div>
+</div>
+
+<!-- SUCCESS VIEW -->
+<div id="successView" class="success-screen">
+  <h2>வாழ்க!</h2>
+  <p class="welcome-line">You're part of the Legend family.</p>
+
+  <div class="fan-id-card">
+    <div class="stamp">LEGEND FANS · OFFICIAL</div>
+    <div class="name" id="successName">—</div>
+    <div class="id-label">FAN ID</div>
+    <div class="id-value" id="successId">LS-000000000</div>
+    <div class="meta" id="successMeta">—</div>
+    <div class="founder-badge">FOUNDER MEMBER</div>
+  </div>
+
+  <p class="success-msg">
+    Save your Fan ID — it's your unique identity in the Legend community.
+    We'll contact you soon with details about events, distributions, and how to connect with your district leader.
+  </p>
+
+  <a href="index.html" class="submit-btn" style="display:inline-block; max-width:240px; text-decoration:none; text-align:center;">Back to home</a>
+</div>
+
+<script>
+  const API_URL = "https://legend-fans-website.onrender.com/register";
+  const form    = document.getElementById('registerForm');
+  const errBox  = document.getElementById('errorBox');
+  const submitBtn = document.getElementById('submitBtn');
+  const formView = document.getElementById('formView');
+  const successView = document.getElementById('successView');
+
+  function showError(msg) {
+    errBox.textContent = msg;
+    errBox.classList.add('show');
+    errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function clearError() {
+    errBox.classList.remove('show');
+    errBox.textContent = '';
+  }
+
+  // Simple front-end mobile validation: must have digits, allow +, spaces, dashes
+  function validMobile(m) {
+    const cleaned = m.replace(/[\s\-()]/g, '');
+    return /^\+?\d{8,15}$/.test(cleaned);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const fd = new FormData(form);
+
+    // Honeypot trap — if filled, it's a bot. Silently fail.
+    if (fd.get('website')) {
+      console.log('Bot detected, silently rejecting');
+      return;
+    }
+
+    // Build payload
+    const data = {
+      name:          (fd.get('name')          || '').trim(),
+      surname:       (fd.get('surname')       || '').trim(),
+      date_of_birth: fd.get('date_of_birth')  || null,
+      mobile:        (fd.get('mobile')        || '').replace(/[\s\-()]/g, ''),
+      email:         (fd.get('email')         || '').trim() || null,
+      street:        (fd.get('street')        || '').trim(),
+      area:          (fd.get('area')          || '').trim() || null,
+      city:          (fd.get('city')          || '').trim(),
+      pincode:       (fd.get('pincode')       || '').trim(),
+      state:         (fd.get('state')         || '').trim(),
+      country:       fd.get('country')        || '',
+    };
+
+    // Front-end validation
+    if (!data.name)    return showError('Please enter your name.');
+    if (!data.surname) return showError('Please enter your surname.');
+    if (!data.date_of_birth) return showError('Please enter your date of birth.');
+    if (!data.mobile)  return showError('Please enter your mobile number.');
+    if (!validMobile(data.mobile)) return showError('Mobile number looks invalid. Use country code (e.g. +91 9876543210).');
+    if (!data.street)  return showError('Please enter your street address.');
+    if (!data.city)    return showError('Please enter your city.');
+    if (!data.pincode) return showError('Please enter your pincode.');
+    if (!data.state)   return showError('Please enter your state.');
+    if (!data.country) return showError('Please select your country.');
+
+    // Age check: must be at least 13
+    const dob = new Date(data.date_of_birth);
+    const age = (Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    if (age < 13) return showError('You must be at least 13 years old to register.');
+    if (age > 120) return showError('Please enter a valid date of birth.');
+
+    // Submit
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registering…';
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        // Backend returned an error
+        const msg = result.detail || 'Something went wrong. Please try again.';
+        showError(msg);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Become a Fan →';
+        return;
+      }
+
+      // SUCCESS!
+      document.getElementById('successName').textContent = result.name + ' ' + data.surname;
+      document.getElementById('successId').textContent   = result.fan_id;
+      document.getElementById('successMeta').textContent = data.city + ', ' + data.state;
+
+      formView.style.display = 'none';
+      successView.classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      console.error(err);
+      showError("Couldn't connect. Please check your internet and try again. If the problem continues, the server may be waking up — try again in 30 seconds.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Become a Fan →';
+    }
+  });
+</script>
+
+</body>
+</html>
