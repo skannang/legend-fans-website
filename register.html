@@ -76,7 +76,6 @@
     border-color: var(--orange);
     background: var(--white);
   }
-  /* Locked prefix (display-only) */
   .mobile-prefix {
     display: flex;
     align-items: center;
@@ -95,7 +94,6 @@
     font-weight: 400;
     font-size: 13px;
   }
-  /* Editable prefix input (when Other selected) */
   .mobile-prefix-input {
     border: none !important;
     background: var(--cream) !important;
@@ -251,7 +249,6 @@
       <div class="field">
         <label>Mobile <span class="tamil">/ கைபேசி எண்</span> <span class="req">*</span></label>
         <div class="mobile-wrap" id="mobileWrap">
-          <!-- Default: locked prefix display -->
           <div class="mobile-prefix empty" id="mobilePrefix">Pick country</div>
           <input type="tel" name="mobile" id="mobileInput" class="mobile-num" required maxlength="14" placeholder="9876543210" autocomplete="tel-national" inputmode="numeric">
         </div>
@@ -300,6 +297,27 @@
 
       <div class="divider"></div>
 
+      <div class="section-label">— Section 03 —</div>
+      <h3 class="section-title">Create your MPIN</h3>
+      <div class="section-title-tamil">உங்கள் MPIN ஐ உருவாக்கவும்</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>MPIN <span class="tamil">/ ரகசிய எண்</span> <span class="req">*</span></label>
+          <input type="password" name="mpin" id="mpinInput" required maxlength="4" placeholder="4-digit PIN" inputmode="numeric" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label>Confirm MPIN <span class="tamil">/ உறுதிப்படுத்தவும்</span> <span class="req">*</span></label>
+          <input type="password" name="mpin_confirm" id="mpinConfirm" required maxlength="4" placeholder="Re-enter PIN" inputmode="numeric" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="helper-tip">
+        A 4-digit PIN you'll use to sign in. Avoid 0000, 1234 or repeating digits.
+        <span class="tamil">உள்நுழைய இந்த எண்ணைப் பயன்படுத்துவீர்கள்.</span>
+      </div>
+
+      <div class="divider"></div>
+
       <button type="submit" id="submitBtn" class="submit-btn">
         Become a Fan <span class="tamil">· ரசிகராக மாறுங்கள்</span> →
       </button>
@@ -333,8 +351,8 @@
     உங்கள் ரசிகர் எண்ணைப் பாதுகாப்பாக சேமித்து வைக்கவும். விரைவில் நாங்கள் உங்களைத் தொடர்பு கொள்வோம்.
   </p>
 
-  <a href="index.html" class="submit-btn" style="display:inline-block; max-width:280px; text-decoration:none; text-align:center;">
-    Back to home <span class="tamil">· முகப்பிற்குச் செல்க</span>
+  <a href="index.html#login" class="submit-btn" style="display:inline-block; max-width:280px; text-decoration:none; text-align:center;">
+    Sign in now <span class="tamil">· உள்நுழைக</span>
   </a>
 </div>
 
@@ -350,9 +368,8 @@
   const mobileWrap    = document.getElementById('mobileWrap');
   const otherTip      = document.getElementById('otherTip');
 
-  // We will swap between two prefix elements depending on country choice:
-  //   - <div class="mobile-prefix"> for known countries (locked display)
-  //   - <input class="mobile-prefix-input"> for "Other" (editable)
+  const WEAK_MPINS = ['0000','1111','2222','3333','4444','5555','6666','7777','8888','9999','1234','4321','1212','1122','0123'];
+
   function setLockedPrefix(code) {
     mobileWrap.innerHTML = `
       <div class="mobile-prefix ${code ? '' : 'empty'}" id="mobilePrefix">${code || 'Pick country'}</div>
@@ -368,12 +385,10 @@
       <input type="tel" name="mobile" id="mobileInput" class="mobile-num" required maxlength="14" placeholder="9876543210" autocomplete="tel-national" inputmode="numeric">
     `;
     attachMobileInputHandler();
-    // Force prefix input to keep leading + and digits only
     const prefixInput = document.getElementById('mobilePrefixInput');
     prefixInput.addEventListener('input', (e) => {
       let v = e.target.value.replace(/[^\d+]/g, '');
       if (!v.startsWith('+')) v = '+' + v.replace(/\+/g, '');
-      // Only one + at most, rest digits
       v = '+' + v.slice(1).replace(/\+/g, '');
       e.target.value = v;
     });
@@ -389,18 +404,19 @@
 
   attachMobileInputHandler();
 
+  // MPIN inputs: digits only
+  ['mpinInput','mpinConfirm'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, '').slice(0, 4); });
+  });
+
   countrySelect.addEventListener('change', () => {
     const opt  = countrySelect.selectedOptions[0];
     const code = opt ? opt.getAttribute('data-code') : '';
     const val  = countrySelect.value;
-
-    if (val === 'XX') {
-      setEditablePrefix();
-    } else if (code) {
-      setLockedPrefix(code);
-    } else {
-      setLockedPrefix(''); // empty / no country
-    }
+    if (val === 'XX') setEditablePrefix();
+    else if (code) setLockedPrefix(code);
+    else setLockedPrefix('');
   });
 
   const ERR = {
@@ -415,6 +431,10 @@
     city:     ['Please enter your city.', 'உங்கள் நகரத்தை உள்ளிடவும்.'],
     pincode:  ['Please enter your pincode.', 'உங்கள் அஞ்சல் குறியீட்டை உள்ளிடவும்.'],
     state:    ['Please enter your state.', 'உங்கள் மாநிலத்தை உள்ளிடவும்.'],
+    mpin:     ['Please create a 4-digit MPIN.', 'தயவுசெய்து 4-இலக்க MPIN ஐ உருவாக்கவும்.'],
+    mpinFmt:  ['MPIN must be exactly 4 digits.', 'MPIN சரியாக 4 இலக்கங்கள் இருக்க வேண்டும்.'],
+    mpinWeak: ['That MPIN is too easy to guess. Choose another.', 'அந்த MPIN எளிதில் ஊகிக்கக்கூடியது.'],
+    mpinMatch:['MPIN and confirmation do not match.', 'MPIN பொருந்தவில்லை.'],
     age13:    ['You must be at least 13 years old to register.', 'பதிவு செய்ய குறைந்தபட்சம் 13 வயது இருக்க வேண்டும்.'],
     ageBad:   ['Please enter a valid date of birth.', 'சரியான பிறந்த தேதியை உள்ளிடவும்.'],
     network:  ["Couldn't connect. The server may be waking up — try again in 30 seconds.", "இணைப்பு கிடைக்கவில்லை. சில நொடிகள் கழித்து மீண்டும் முயற்சிக்கவும்."]
@@ -442,11 +462,9 @@
     const fd = new FormData(form);
     if (fd.get('website')) { console.log('Bot detected'); return; }
 
-    // Determine country code
     const countryVal = countrySelect.value;
     let countryCode = '';
     if (countryVal === 'XX') {
-      // Editable prefix — read it
       const prefixInput = document.getElementById('mobilePrefixInput');
       countryCode = (prefixInput ? prefixInput.value : '').trim();
       if (countryCode && !countryCode.startsWith('+')) countryCode = '+' + countryCode;
@@ -457,6 +475,9 @@
 
     const localNumber = (fd.get('mobile') || '').replace(/\D/g, '');
     const fullMobile  = (countryCode && localNumber) ? countryCode + localNumber : '';
+
+    const mpinVal  = (document.getElementById('mpinInput').value || '').trim();
+    const mpinConf = (document.getElementById('mpinConfirm').value || '').trim();
 
     const data = {
       name:          (fd.get('name')          || '').trim(),
@@ -470,6 +491,7 @@
       pincode:       (fd.get('pincode')       || '').trim(),
       state:         (fd.get('state')         || '').trim(),
       country:       countryVal,
+      mpin:          mpinVal,
     };
 
     // Validation
@@ -484,6 +506,10 @@
     if (!data.city)    return showError('city');
     if (!data.pincode) return showError('pincode');
     if (!data.state)   return showError('state');
+    if (!mpinVal)                  return showError('mpin');
+    if (!/^\d{4}$/.test(mpinVal))  return showError('mpinFmt');
+    if (WEAK_MPINS.includes(mpinVal)) return showError('mpinWeak');
+    if (mpinVal !== mpinConf)      return showError('mpinMatch');
 
     const dob = new Date(data.date_of_birth);
     const age = (Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -507,6 +533,9 @@
         submitBtn.innerHTML = 'Become a Fan <span class="tamil">· ரசிகராக மாறுங்கள்</span> →';
         return;
       }
+
+      // Auto-login: store the session token returned by the backend
+      if (result.token) localStorage.setItem('legend_token', result.token);
 
       document.getElementById('successName').textContent = result.name + ' ' + data.surname;
       document.getElementById('successId').textContent   = result.fan_id;
