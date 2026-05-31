@@ -1,13 +1,13 @@
 """
 Legend Fans Website - Backend API
 v2.0 - Registration (v1.1) + Login / MPIN / Forgot-MPIN
- 
+
 Built on top of the existing v1.1 backend. ALL existing behaviour preserved:
   - CORS locked to the live site
   - Rate limiting, honeypot, age check, input validation
   - fan_id via Postgres sequence (fan_seq)
   - Neon Postgres via DATABASE_URL
- 
+
 ADDED (run migration.sql first):
   - MPIN at signup (optional field; 4-digit, hashed with bcrypt)
   - POST /login           mobile + MPIN -> 30-day session token
@@ -16,7 +16,7 @@ ADDED (run migration.sql first):
   - POST /forgot-mpin/request   mobile -> OTP (5-min)
   - POST /forgot-mpin/reset     mobile + OTP + new MPIN
   - Lockout: 5 wrong MPIN -> 15-min lock
- 
+
 Decisions locked: 4-digit MPIN, mobile+MPIN login, OTP forgot, 5/15 lockout,
 30-day session, auto-login after signup.
 """
@@ -29,17 +29,17 @@ from datetime import date
 from collections import defaultdict
 from threading import Lock
 from typing import Optional
- 
+
 import bcrypt
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
- 
+
 # ---- App setup ----
 app = FastAPI(title="Legend Fans API", version="2.0")
- 
+
 ALLOWED_ORIGINS = [
     "https://skannang.github.io",
     "http://localhost:8000",
@@ -52,7 +52,7 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],
 )
- 
+
 # ---- Auth config ----
 DEV_MODE     = os.environ.get("DEV_MODE", "true").lower() == "true"
 SESSION_DAYS = 30
@@ -61,13 +61,13 @@ MAX_FAILED   = 5
 LOCKOUT_MIN  = 15
 WEAK_MPINS   = {"0000","1111","2222","3333","4444","5555","6666","7777","8888",
                 "9999","1234","4321","1212","1122","0123"}
- 
+
 # ---- Rate limiting (in-memory, simple) ----
 RATE_LIMIT = 5
 RATE_WINDOW = 300
 _rate_store = defaultdict(list)
 _rate_lock = Lock()
- 
+
 def check_rate_limit(ip: str):
     now = time.time()
     with _rate_lock:
@@ -75,47 +75,47 @@ def check_rate_limit(ip: str):
         if len(_rate_store[ip]) >= RATE_LIMIT:
             raise HTTPException(429, "Too many registration attempts. Please wait a few minutes and try again.")
         _rate_store[ip].append(now)
- 
+
 # ---- Database ----
 DATABASE_URL = os.environ.get("DATABASE_URL")
 def get_db():
     return psycopg2.connect(DATABASE_URL)
- 
+
 # ---- Auth helpers ----
 def _now(): return dt.datetime.utcnow()
 def _iso(t): return t.replace(microsecond=0).isoformat()
- 
+
 def hash_mpin(m): return bcrypt.hashpw(m.encode(), bcrypt.gensalt()).decode()
 def check_mpin(m, h):
     try: return bool(h) and bcrypt.checkpw(m.encode(), h.encode())
     except Exception: return False
- 
+
 def validate_mpin_value(m):
     if not re.fullmatch(r"\d{4}", m or ""):
         raise HTTPException(400, "MPIN must be exactly 4 digits.")
     if m in WEAK_MPINS:
         raise HTTPException(400, "That MPIN is too easy to guess. Choose another.")
- 
+
 def normalize_mobile(raw):
     s = re.sub(r"[^\d+]", "", raw or "")
     if s.startswith("00"): s = "+" + s[2:]
     if not s.startswith("+"): s = "+" + s
     return s
- 
+
 def make_session(cur, fan_id):
     token = secrets.token_urlsafe(32)
     cur.execute("INSERT INTO sessions (token, fan_id, expires_at) VALUES (%s,%s,%s)",
                 (token, fan_id, _iso(_now() + dt.timedelta(days=SESSION_DAYS))))
     return token
- 
+
 def fan_public(r):
     return {"fan_id": r["fan_id"], "name": r["name"], "surname": r.get("surname"),
             "city": r.get("city"), "state": r.get("state"), "country": r.get("country")}
- 
+
 def send_otp_sms(mobile, code):
     """TODO: wire MSG91 here for production."""
     print(f"[OTP] {mobile} -> {code}")
- 
+
 # ---- Schemas ----
 class FanRegistration(BaseModel):
     name:          str = Field(..., min_length=1, max_length=80)
@@ -131,7 +131,7 @@ class FanRegistration(BaseModel):
     country:       str = Field(..., min_length=2, max_length=2)
     mpin:          Optional[str] = None          # NEW: 4-digit, set at signup
     website:       Optional[str] = None          # honeypot
- 
+
     @field_validator('mobile')
     @classmethod
     def _mobile(cls, v):
@@ -139,7 +139,7 @@ class FanRegistration(BaseModel):
         if not re.match(r'^\+?\d{8,15}$', cleaned):
             raise ValueError('Invalid mobile number format')
         return cleaned
- 
+
     @field_validator('email')
     @classmethod
     def _email(cls, v):
@@ -147,11 +147,11 @@ class FanRegistration(BaseModel):
         if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', v):
             raise ValueError('Invalid email format')
         return v.lower()
- 
+
     @field_validator('country')
     @classmethod
     def _country(cls, v): return v.upper()
- 
+
     @field_validator('mpin')
     @classmethod
     def _mpin(cls, v):
@@ -159,30 +159,30 @@ class FanRegistration(BaseModel):
         if not re.fullmatch(r'\d{4}', v): raise ValueError('MPIN must be 4 digits')
         if v in WEAK_MPINS: raise ValueError('MPIN is too easy to guess')
         return v
- 
+
     @field_validator('name', 'surname', 'city', 'state')
     @classmethod
     def _strip(cls, v): return v.strip() if v else v
- 
+
 class LoginIn(BaseModel):
     mobile: str
     mpin: str
- 
+
 class ForgotRequestIn(BaseModel):
     mobile: str
- 
+
 class ForgotResetIn(BaseModel):
     mobile: str
     otp: str
     new_mpin: str
- 
+
 # ===================================================================
 # Routes
 # ===================================================================
 @app.get("/")
 def home():
     return {"status": "Legend Fans API is running", "version": "2.0", "dev_mode": DEV_MODE}
- 
+
 @app.post("/register")
 def register_fan(fan: FanRegistration, request: Request):
     # 1. Honeypot
@@ -233,7 +233,7 @@ def register_fan(fan: FanRegistration, request: Request):
         raise HTTPException(500, "Registration could not be completed. Please try again.")
     finally:
         if conn: conn.close()
- 
+
 @app.post("/login")
 def login(body: LoginIn):
     mobile = normalize_mobile(body.mobile)
@@ -275,7 +275,7 @@ def login(body: LoginIn):
         if conn: conn.close()
     if error: raise HTTPException(error[0], error[1])
     return result
- 
+
 @app.get("/me")
 def me(authorization: str = Header(None)):
     token = (authorization or "").replace("Bearer ", "").strip()
@@ -293,7 +293,7 @@ def me(authorization: str = Header(None)):
         return {"fan": fan_public(row)}
     finally:
         if conn: conn.close()
- 
+
 @app.post("/logout")
 def logout(authorization: str = Header(None)):
     token = (authorization or "").replace("Bearer ", "").strip()
@@ -306,7 +306,7 @@ def logout(authorization: str = Header(None)):
         return {"ok": True}
     finally:
         if conn: conn.close()
- 
+
 @app.post("/forgot-mpin/request")
 def forgot_request(body: ForgotRequestIn):
     mobile = normalize_mobile(body.mobile)
@@ -318,7 +318,7 @@ def forgot_request(body: ForgotRequestIn):
         cur.execute("SELECT 1 FROM fans WHERE mobile = %s", (mobile,))
         if not cur.fetchone():
             return {"sent": True}    # don't reveal existence
-        code = f"{secrets.randbelow(1000000):06d}"
+        code = "123456" if DEV_MODE else f"{secrets.randbelow(1000000):06d}"
         cur.execute("DELETE FROM otps WHERE mobile = %s", (mobile,))
         cur.execute("INSERT INTO otps (mobile, code, expires_at) VALUES (%s,%s,%s)",
                     (mobile, code, _iso(_now()+dt.timedelta(minutes=OTP_TTL_MIN))))
@@ -329,7 +329,7 @@ def forgot_request(body: ForgotRequestIn):
     resp = {"sent": True}
     if DEV_MODE: resp["dev_otp"] = code
     return resp
- 
+
 @app.post("/forgot-mpin/reset")
 def forgot_reset(body: ForgotResetIn):
     mobile = normalize_mobile(body.mobile)
